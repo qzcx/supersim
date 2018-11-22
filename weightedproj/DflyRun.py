@@ -23,8 +23,8 @@ def main(args):
 
   supersim_path = 'supersim'
   settings_path = 'settings_realistic_dfly.json'
-  ssparse_path = '~/ssenv/ssparse/bin/ssparse'
-  transient_path = '~/ssenv/ssparse/scripts/transient.py'
+  ssparse_path = '~/supersim/ssparse/bin/ssparse'
+  transient_path = '~/supersim/ssparse/scripts/transient.py'
 
   def create_task(tm, name, cmd, console_out, task_type, config):
     task = ProcessTask(tm, name, cmd)
