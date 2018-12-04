@@ -84,6 +84,8 @@ AdaptiveRoutingAlgorithm::AdaptiveRoutingAlgorithm(
   localPortBase_ = concentration_;
   globalPortBase_ = concentration_ + ((localWidth_ - 1) * localWeight_);
 
+  propRatioWeight_ = _settings["prop_ratio_weight"].asFloat();
+  // printf("prop_ratio_weight: %f", propRatioWeight_);
   // create the reduction
   reduction_ = Reduction::create("Reduction", this, _router, mode_, true,
                                  _settings["reduction"]);
@@ -274,23 +276,26 @@ void AdaptiveRoutingAlgorithm::processRequest(
 }
 
 void AdaptiveRoutingAlgorithm::addPort(
-    u32 _port, u32 _hops, u32 _routingClass) {
+    u32 _port, u32 _hops, u32 _routingClass, f64 propRatio) {
   // add port for reduction function
   if (routingModeIsPort(mode_)) {
-    f64 cong = portCongestion(mode_, router_, inputPort_, inputVc_, _port);
+    f64 cong = portCongestion(mode_, router_, inputPort_, inputVc_, _port)
+             + propRatio;
     reduction_->add(_port, _routingClass, _hops, cong);
   } else {
     if (_routingClass == U32_MAX) {
       // add all VCs in the port
       for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
-        f64 cong = router_->congestionStatus(inputPort_, inputVc_, _port, vc);
+        f64 cong = router_->congestionStatus(inputPort_, inputVc_, _port, vc)
+                 + propRatio;
         reduction_->add(_port, vc, _hops, cong);
       }
     } else {
       // all all VCs in the specified routing class
       for (u32 vc = baseVc_ + _routingClass; vc < baseVc_ + numVcs_;
            vc += rcs_) {
-        f64 cong = router_->congestionStatus(inputPort_, inputVc_, _port, vc);
+        f64 cong = router_->congestionStatus(inputPort_, inputVc_, _port, vc)
+                 + propRatio;
         reduction_->add(_port, vc, _hops, cong);
       }
     }
@@ -356,17 +361,30 @@ void AdaptiveRoutingAlgorithm::addGlobalPorts(
           // add ports to route to local router connected to global port
           u32 rc = isMinimal ? _minLocalRc : _nonminLocalRc;
           u32 hops = isMinimal ? 1 : 2;
+          f64 propRatio = calcPropegationRatio(gOffset);
+          // printf("propRatio: %f", propRatio);
+          // f64 hopsAdj = hops + propRatio;
           u32 lOffset = computeOffset(_thisRouter, localRouter, localWidth_);
           for (u32 lWeight = 0; lWeight < localWeight_; lWeight++) {
             u32 port = computeLocalSrcPort(localPortBase_, lOffset,
                                            localWeight_, lWeight);
-            addPort(port, hops, routingClasses_.at(rc));
+            addPort(port, hops, routingClasses_.at(rc), propRatio);
           }
         }
       }
     }
   }
 }
+
+f64 AdaptiveRoutingAlgorithm::calcPropegationRatio(u32 _gOffset) {
+  u32 thisGroup = router_->address().at(1);
+  u32 dstGroup = (_gOffset + thisGroup) % globalWidth_;
+  f64 wireDist = abs(dstGroup - thisGroup);
+  // f64 propRatioWeight = network->settings_["prop_ratio_weight"].asFloat();
+  f64 propRatio = wireDist/globalWidth_ * propRatioWeight_;
+  return propRatio;
+}
+
 }  // namespace Dragonfly
 
 registerWithObjectFactory("adaptive", Dragonfly::RoutingAlgorithm,

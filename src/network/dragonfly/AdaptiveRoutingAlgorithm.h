@@ -47,7 +47,7 @@ class AdaptiveRoutingAlgorithm : public RoutingAlgorithm {
 
  private:
   static std::vector<u32> createRoutingClasses(Json::Value _settings);
-  void addPort(u32 _port, u32 _hops, u32 _routingClass);
+  void addPort(u32 _port, u32 _hops, u32 _routingClass, f64 propRatio = 0);
 
   void addPortsToLocalRouter(u32 _src, u32 _dst, bool _minimalOnly,
                              u32 _minRc, u32 _nonminRc);
@@ -57,11 +57,14 @@ class AdaptiveRoutingAlgorithm : public RoutingAlgorithm {
                       u32 _minGlobalRc, u32 _nonminGlobalRc,
                       u32 _minLocalRc, u32 _nonminLocalRc);
 
+  f64 calcPropegationRatio(u32 _dstGlobalOffset);
+
   bool progressiveAdaptive_;
   bool valiantNode_;
   u32 rcs_;
   u32 localPortBase_;
   u32 globalPortBase_;
+  f64 propRatioWeight_;
 
   std::vector<u32> routingClasses_;
   const RoutingMode mode_;
