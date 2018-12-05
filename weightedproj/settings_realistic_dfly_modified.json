@@ -1,0 +1,157 @@
+{
+  "simulator": {
+    "channel_cycle_time": 1000,
+    "router_cycle_time": 714,
+    "interface_cycle_time": 1,
+    "print_progress": true,
+    "print_interval": 1.0,  // seconds
+    "random_seed": 12345678
+  },
+  "network": {
+    "topology": "THIS SHOULD BE OVER-WRITTEN!",
+    "protocol_classes": [
+      {
+        "num_vcs": "THIS SHOULD BE OVER-WRITTEN!",
+        "routing": {
+          "algorithm": "THIS SHOULD BE OVER-WRITTEN!",
+          "latency": 1,
+          "prop_ratio_weight" : "THIS SHOULD BE OVER-WRITTEN!" // 0 | 1
+        }
+      }
+    ],
+    "channel_mode": "THIS SHOULD BE OVER-WRITTEN!",  // "fixed" | "scalar"
+    "global_channel": {
+      "latency": "THIS SHOULD BE OVER-WRITTEN!"  // 100 cycles
+    },
+    "local_channel": {
+      "latency": "THIS SHOULD BE OVER-WRITTEN!"  // 25 cycles
+    },
+    "external_channel": {
+      "latency": 5  // cycles
+    },
+    "channel_log": {
+      "file": "/dev/null"  // "channels.csv"
+    },
+    "router": {
+      "architecture": "input_output_queued",
+      "congestion_sensor": {
+        "algorithm": "buffer_occupancy",
+        "latency": 1,
+        "granularity": 0,
+        "minimum": 0.0,
+        "offset": "THIS SHOULD BE OVER-WRITTEN!",
+        "mode": "THIS SHOULD BE OVER-WRITTEN!"  // {normalized,absolute}_{port,vc}
+      },
+      "congestion_mode": "THIS SHOULD BE OVER-WRITTEN!",
+      "input_queue_mode": "THIS SHOULD BE OVER-WRITTEN!",  // fixed or tailored
+      "input_queue_depth": "THIS SHOULD BE OVER-WRITTEN!",
+      "input_queue_max": "THIS SHOULD BE OVER-WRITTEN!", //  only for tailor mode
+      "input_queue_min": "THIS SHOULD BE OVER-WRITTEN!", //  only for tailor mode
+
+      "vca_swa_wait": true,
+      "output_queue_depth": 256,
+      "crossbar": {
+        "latency": 50  // cycles
+      },
+      "vc_scheduler": {
+        "allocator": {
+          "type": "rc_separable",
+          "slip_latch": true,
+          "iterations": 1,
+          "resource_arbiter": {
+            "type": "THIS SHOULD BE OVER-WRITTEN!",
+            "greater": false
+          },
+          "client_arbiter": {
+            "type": "THIS SHOULD BE OVER-WRITTEN!",
+            "greater": false
+          }
+        }
+      },
+      "crossbar_scheduler": {
+        "allocator": {
+          "type": "r_separable",
+          "slip_latch": true,
+          "resource_arbiter": {
+            "type": "THIS SHOULD BE OVER-WRITTEN!",
+            "greater": false
+          }
+        },
+        "full_packet": true,
+        "packet_lock": true,
+        "idle_unlock": false
+      },
+      "output_crossbar": {
+        "latency": 1  // cycles
+      },
+      "output_crossbar_scheduler": "THIS SHOULD BE OVER-WRITTEN!"
+    },
+    "interface": {
+      "type": "standard",
+      "adaptive": false,
+      "fixed_msg_vc": false,
+      "crossbar_scheduler": "THIS SHOULD BE OVER-WRITTEN!",
+      "init_credits_mode": "$&(network.router.input_queue_mode)&$",
+      "init_credits": "$&(network.router.input_queue_depth)&$",
+      "credits_max": "$&(network.router.input_queue_max)&$", //  tailor mode
+      "credits_min": "$&(network.router.input_queue_min)&$", //  tailor mode
+      "crossbar": {
+        "latency": 1  // cycles
+      }
+    }
+  },
+  "metadata_handler": {
+    "type": "creation_timestamp",
+    "delay": 10000,
+    "algorithm": "message"
+  },
+  "workload": {
+    "message_log": {
+      "file": "/dev/null"  // "data.mpf.gz"
+    },
+    "applications": [
+      {
+        "type": "blast",
+        "warmup_threshold": 0.90,
+        "kill_on_saturation": true,
+        "log_during_saturation": false,
+        "blast_terminal": {
+          // requests
+          "request_protocol_class": 0,
+          "request_injection_rate": "THIS SHOULD BE OVER-WRITTEN!",
+          // responses
+          "enable_responses": false,
+          // warmup
+          "warmup_interval": 200,  // delivered flits
+          "warmup_window": 15,
+          "warmup_attempts": 50,
+          // traffic generation
+          "num_transactions": 1000,
+          "max_packet_size": 16,
+          "traffic_pattern" : {
+            "type" : "THIS SHOULD BE OVER-WRITTEN!",
+            "group_size" : "THIS SHOULD BE OVER-WRITTEN!",
+            "concentration" : "THIS SHOULD BE OVER-WRITTEN!",
+            "group_mode": "THIS SHOULD BE OVER-WRITTEN!",
+            "destination_mode": "THIS SHOULD BE OVER-WRITTEN!",
+            "send_to_self": true
+          },
+          "message_size_distribution" : {
+            "max_message_size" : 16,
+            "min_message_size" : 1,
+            "type" : "random"
+          }
+        },
+        "rate_log": {
+          "file": "/dev/null"  // "rates.csv"
+        }
+      }
+    ]
+  },
+  "debug": [
+    "Workload",
+    "Network",
+    "Workload.Application_0",
+    "Workload.Application_0.BlastTerminal_0"
+  ]
+}

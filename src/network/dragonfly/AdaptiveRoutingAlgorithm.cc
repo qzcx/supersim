@@ -361,7 +361,7 @@ void AdaptiveRoutingAlgorithm::addGlobalPorts(
           // add ports to route to local router connected to global port
           u32 rc = isMinimal ? _minLocalRc : _nonminLocalRc;
           u32 hops = isMinimal ? 1 : 2;
-          f64 propRatio = calcPropegationRatio(gOffset);
+          f64 propRatio = calcPropegationRatio(gOffset, _dstGlobalOffset);
           // printf("propRatio: %f", propRatio);
           // f64 hopsAdj = hops + propRatio;
           u32 lOffset = computeOffset(_thisRouter, localRouter, localWidth_);
@@ -376,12 +376,16 @@ void AdaptiveRoutingAlgorithm::addGlobalPorts(
   }
 }
 
-f64 AdaptiveRoutingAlgorithm::calcPropegationRatio(u32 _gOffset) {
+f64 AdaptiveRoutingAlgorithm::calcPropegationRatio(
+    u32 _gOffset, u32 _dstGlobalOffset) {
   u32 thisGroup = router_->address().at(1);
-  u32 dstGroup = (_gOffset + thisGroup) % globalWidth_;
-  f64 wireDist = abs(dstGroup - thisGroup);
+  u32 nextGroup = (_gOffset + thisGroup) % globalWidth_;
+  f64 nextWireDist = abs(nextGroup - thisGroup);
+  u32 dstGroup = (_dstGlobalOffset + thisGroup) % globalWidth_;
+  f64 dstWireDist = abs(dstGroup - nextGroup);
   // f64 propRatioWeight = network->settings_["prop_ratio_weight"].asFloat();
-  f64 propRatio = wireDist/globalWidth_ * propRatioWeight_;
+  f64 propRatio = (nextWireDist+dstWireDist)/
+                    (2*globalWidth_) * propRatioWeight_;
   return propRatio;
 }
 

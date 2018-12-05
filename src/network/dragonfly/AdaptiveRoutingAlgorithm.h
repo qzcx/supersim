@@ -57,7 +57,7 @@ class AdaptiveRoutingAlgorithm : public RoutingAlgorithm {
                       u32 _minGlobalRc, u32 _nonminGlobalRc,
                       u32 _minLocalRc, u32 _nonminLocalRc);
 
-  f64 calcPropegationRatio(u32 _dstGlobalOffset);
+  f64 calcPropegationRatio(u32 _gOffset, u32 _dstGlobalOffset);
 
   bool progressiveAdaptive_;
   bool valiantNode_;
