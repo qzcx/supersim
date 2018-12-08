@@ -14,7 +14,8 @@
         "num_vcs": "THIS SHOULD BE OVER-WRITTEN!",
         "routing": {
           "algorithm": "THIS SHOULD BE OVER-WRITTEN!",
-          "latency": 1
+          "latency": 1,
+          "prop_ratio_weight" : "THIS SHOULD BE OVER-WRITTEN!" // 0 | 1
         }
       }
     ],

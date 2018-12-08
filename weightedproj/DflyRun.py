@@ -21,10 +21,10 @@ def main(args):
                    resource_manager=rm,
                    failure_mode=fm)
 
-  supersim_path = '../supersim/bin/supersim'
+  supersim_path = '~/ssdev/supersim/bin/supersim'
   settings_path = 'settings_realistic_dfly.json'
-  ssparse_path = '../ssparse/bin/ssparse'
-  transient_path = '../ssparse/scripts/transient.py'
+  ssparse_path = '~/ssdev/ssparse/bin/ssparse'
+  transient_path = '~/ssdev/ssparse/scripts/transient.py'
 
   def create_task(tm, name, cmd, console_out, task_type, config):
     task = ProcessTask(tm, name, cmd)
@@ -204,7 +204,7 @@ def main(args):
   sw.add_variable('Topology Routing', 'TR', topology_routing,
                   set_topolgy_routing)
 
-  variable_channels = ['scalar-[2.93_4.25]', 'fixed-[9_99]'] # 64x1-8x2-8c
+  variable_channels = ['scalar-[2.93_4.25]']#, 'fixed-[9_99]'] # 64x1-8x2-8c
   #'scalar-[1.28_8.36]', 'fixed-[9_99]'] # 32x4-16x1-8c
 
 
@@ -244,6 +244,14 @@ def main(args):
             assert False
     return cmd
   sw.add_variable('Channels', 'Ch', variable_channels, set_channels)
+
+  prop_ratio_weight = ['0','0.25','0.5']
+
+  def set_prop_ratio_weight(weight, config):
+    cmd = ' network.protocol_classes[0].routing.prop_ratio_weight=float='+ weight
+    return cmd
+
+  sw.add_variable('PropWeight', 'PR', prop_ratio_weight, set_prop_ratio_weight)
 
   tailor_buffers = [#'fixed-589', 'tailored-2.2',
                     ##'tailored-3.0', 'tailored-4.0',
@@ -383,23 +391,25 @@ def main(args):
   ##############################################################################
   # analyses
   if not args.skip_analyses:
-    sw.add_plot('time-latency-scatter', 'all', title_format='short-equal')
-    sw.add_plot('latency-pdf', 'all', title_format='short-equal')
-    sw.add_plot('latency-cdf', 'all', title_format='short-equal')
-    sw.add_plot('latency-percentile', 'all', title_format='short-equal')
+    #sw.add_plot('time-latency-scatter', 'all', title_format='short-equal')
+    #sw.add_plot('latency-pdf', 'all', title_format='short-equal')
+    #sw.add_plot('latency-cdf', 'all', title_format='short-equal')
+    #sw.add_plot('latency-percentile', 'all', title_format='short-equal')
     sw.add_plot('load-latency', 'all', title_format='off',
                 plot_style='inferno-markers', ymin='0',
                 xmax=100) #, ymax='3000')
     sw.add_plot('load-latency-compare', 'all', title_format='off',
-                plot_style='inferno-markers')
-                #figure_size='10x4',
-                #ymin=0, ymax=3000,
-                #xmin=0, xmax=100,
+                plot_style='inferno-markers',
+                figure_size='8x5',
+                ymin=0, #ymax=3000,
+                xmin=0, xmax=100)
                 #legend_location=2)
     sw.add_plot('load-average-hops', 'all', title_format='off',
+                ymax=7,ymin=0,
+                figure_size='8x5',
                 yauto_frame=0.02)
-    sw.add_plot('load-percent-minimal', 'all', title_format='short-equal',
-                yauto_frame=0.02)
+    #sw.add_plot('load-percent-minimal', 'all', title_format='short-equal',
+    #            yauto_frame=0.02)
 
   ##############################################################################
   # run
